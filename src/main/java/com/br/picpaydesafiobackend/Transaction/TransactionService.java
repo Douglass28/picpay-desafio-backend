@@ -1,6 +1,7 @@
 package com.br.picpaydesafiobackend.Transaction;
 
-import com.br.picpaydesafiobackend.exception.InvalidTransactionException;
+import com.br.picpaydesafiobackend.authorization.AuthorizerService;
+import com.br.picpaydesafiobackend.notification.NotificationService;
 import com.br.picpaydesafiobackend.wallet.Wallet;
 import com.br.picpaydesafiobackend.wallet.WalletRepository;
 import com.br.picpaydesafiobackend.wallet.WalletType;
@@ -12,10 +13,15 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final WalletRepository walletRepository;
+    private final AuthorizerService authorizerService;
+    private final NotificationService notificationService;
 
-    private TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository){
+    private TransactionService(TransactionRepository transactionRepository,
+                               WalletRepository walletRepository, AuthorizerService authorizerService, NotificationService notificationService){
         this.transactionRepository = transactionRepository;
         this.walletRepository = walletRepository;
+        this.authorizerService = authorizerService;
+        this.notificationService = notificationService;
     }
     @Transactional
     public Transactions create(Transactions transactions){
@@ -24,10 +30,8 @@ public class TransactionService {
         var newTransaction =  transactionRepository.save(transactions);
         var wallet = walletRepository.findById(transactions.payer()).get();
         walletRepository.save(wallet.debit(transactions.value()));
-
-        //call the service externo
-         // authorize transaction
-        // send message
+        authorizerService.authorize(transactions);
+        notificationService.notify(transactions);
 
         return newTransaction;
     }
