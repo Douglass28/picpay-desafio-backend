@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 
 @Table(name = "WALLETS")
 public record Wallets(
-
         @Id
         Long Id,
         String nome,
@@ -15,5 +14,5 @@ public record Wallets(
         String email,
         String password,
         BigDecimal balance,
-        WalletType walletType) {
+        int walletType) {
 }
