@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 public record Transactions(
         @Id
         Long id,
-        String payer,
-        String payee,
+        Long payer,
+        Long payee,
         BigDecimal value,
         @CreatedDate LocalDateTime createdAt) {
 
