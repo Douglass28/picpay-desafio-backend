@@ -1,10 +1,12 @@
 package com.br.picpaydesafiobackend.notification;
 
-import com.br.picpaydesafiobackend.Transaction.Transactions;
+import com.br.picpaydesafiobackend.Transaction.Transaction;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+@Slf4j
 @Service
 public class NotificationConsumer {
 
@@ -17,11 +19,17 @@ public class NotificationConsumer {
     }
 
     @KafkaListener(topics = "transaction-notification", groupId = "picpay-desafio-backend")
-    public void receiveNotification(Transactions transactions){
+    public void receiveNotification(Transaction transaction){
+        log.info("Notifying transaction: {} ", transaction);
 
         var response = restClient.get()
                 .retrieve()
                 .toEntity(Notifications.class);
+
+        if (response.getStatusCode().isError() || !response.getBody().message())
+            throw new NotificationException("Error sending notification!" );
+
+        log.info("Notification has been sent: {} ", response.getBody());
     }
 
 }

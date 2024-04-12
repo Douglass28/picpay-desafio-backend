@@ -1,20 +1,20 @@
 package com.br.picpaydesafiobackend.notification;
 
-import com.br.picpaydesafiobackend.Transaction.Transactions;
+import com.br.picpaydesafiobackend.Transaction.Transaction;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class NotificationProducer {
 
-    private final KafkaTemplate<String, Transactions> kafkaTemplate;
+    private final KafkaTemplate<String, Transaction> kafkaTemplate;
 
 
-    public NotificationProducer(KafkaTemplate<String, Transactions> kafkaTemplate) {
+    public NotificationProducer(KafkaTemplate<String, Transaction> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendNotification(Transactions transactions){
-        kafkaTemplate.send("transaction-notification", transactions);
+    public void sendNotification(Transaction transaction){
+        kafkaTemplate.send("transaction-notification", transaction);
     }
 }
