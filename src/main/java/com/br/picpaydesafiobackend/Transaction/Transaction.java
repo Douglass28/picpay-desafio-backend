@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Table(name = "TRANSACTIONS")
-public record Transactions(
+public record Transaction(
         @Id
         Long id,
         Long payer,
@@ -16,7 +16,7 @@ public record Transactions(
         BigDecimal value,
         @CreatedDate LocalDateTime createdAt) {
 
-    public Transactions{
+    public Transaction {
         value.setScale(2);
     }
 }
