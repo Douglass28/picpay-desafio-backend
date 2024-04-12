@@ -1,9 +1,14 @@
 package com.br.picpaydesafiobackend.authorization;
 
-import com.br.picpaydesafiobackend.Transaction.Transactions;
+import com.br.picpaydesafiobackend.Transaction.Transaction;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.util.logging.Logger;
+
+@Slf4j
 @Service
 public class AuthorizerService {
 
@@ -15,14 +20,17 @@ public class AuthorizerService {
                 .build();
     }
 
-    public void authorize(Transactions transactions){
+    public void authorize(Transaction transaction){
+        log.info("Authorizing transaction : {}", transaction);
         var response = restClient.get()
                 .retrieve()
                 .toEntity(Authorization.class);
 
-        if (response.getStatusCode().isError() || !response.getBody().isAuthorized()){
+        if (response.getStatusCode().isError() || !response.getBody().isAuthorized())
             throw new UnauthorizedTransactionException("Unauthorized transaction!");
-        }
 
-   }
+        log.info("Transaction authorized : {}", transaction);
+
+
+    }
 }

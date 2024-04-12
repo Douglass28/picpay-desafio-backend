@@ -8,6 +8,8 @@ import com.br.picpaydesafiobackend.wallet.WalletType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class TransactionService {
 
@@ -24,16 +26,25 @@ public class TransactionService {
         this.notificationService = notificationService;
     }
     @Transactional
-    public Transactions create(Transactions transactions){
+    public Transaction create(Transaction transaction){
 
-        validade(transactions);
-        var newTransaction =  transactionRepository.save(transactions);
-        var wallet = walletRepository.findById(transactions.payer()).get();
-        walletRepository.save(wallet.debit(transactions.value()));
-        authorizerService.authorize(transactions);
-        notificationService.notify(transactions);
+        validade(transaction);
+
+        var newTransaction =  transactionRepository.save(transaction);
+
+        var walletPayer = walletRepository.findById(transaction.payer()).get();
+        var walletPayee = walletRepository.findById(transaction.payee()).get();
+        walletRepository.save(walletPayer.debit(transaction.value()));
+        walletRepository.save(walletPayee.credit(transaction.value()));
+        authorizerService.authorize(transaction);
+        notificationService.notify(transaction);
 
         return newTransaction;
+    }
+
+    public List<Transaction> getAllTransaction(){
+        var list=  transactionRepository.findAll();
+        return list;
     }
 
     /*
@@ -41,18 +52,18 @@ public class TransactionService {
     - the payer has enough balance
     - the payer is not the payee
      */
-    private void validade(Transactions transactions) {
-        walletRepository.findById(transactions.payee())
-                .map(payee -> walletRepository.findById(transactions.payer())
-                        .map(payer -> isTransactionValid(transactions, payer) ? transactions : null)
-                        .orElseThrow(() -> new InvalidTransactionException("Invalid Transaction - %s".formatted(transactions))))
-                .orElseThrow((() -> new InvalidTransactionException("Invalid Transaction - %s".formatted(transactions))));
+    private void validade(Transaction transaction) {
+        walletRepository.findById(transaction.payee())
+                .map(payee -> walletRepository.findById(transaction.payer())
+                        .map(payer -> isTransactionValid(transaction, payer) ? transaction : null)
+                        .orElseThrow(() -> new InvalidTransactionException("Invalid Transaction - %s".formatted(transaction))))
+                .orElseThrow((() -> new InvalidTransactionException("Invalid Transaction - %s".formatted(transaction))));
     }
 
-    private static boolean isTransactionValid(Transactions transactions, Wallet payer) {
+    private static boolean isTransactionValid(Transaction transaction, Wallet payer) {
         return payer.type() == WalletType.USER_COMUM.getValue() &&
-                payer.balance().compareTo(transactions.value()) >= 0 &&
-                !payer.id().equals(transactions.payee());
+                payer.balance().compareTo(transaction.value()) >= 0 &&
+                !payer.id().equals(transaction.payee());
     }
 
 }
