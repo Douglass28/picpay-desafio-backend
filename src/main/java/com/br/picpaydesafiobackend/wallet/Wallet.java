@@ -1,9 +1,7 @@
 package com.br.picpaydesafiobackend.wallet;
 
-import com.br.picpaydesafiobackend.Transaction.Transactions;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -20,4 +18,10 @@ public record Wallet(
         public Wallet debit(BigDecimal value){
                 return new Wallet(id, nome, document, email, password, balance.subtract(value), type);
         }
+
+        public Wallet credit(BigDecimal value){
+                return new Wallet(id, nome, document, email, password, balance.add(value), type);
+        }
+
+
 }
